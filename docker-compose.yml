@@ -17,6 +17,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./data/raw:/data/raw:ro
 
     healthcheck:
       test:
@@ -31,4 +32,5 @@ services:
 volumes:
   postgres_data:
     name: olist-postgres-data
+
 
