@@ -1,0 +1,252 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: Cleaned and standardized customer records.
+
+    columns:
+      - name: customer_id
+        description: Unique identifier for each customer record.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_unique_id
+        description: Identifier used to recognize the same customer across orders.
+        data_tests:
+          - not_null
+
+      - name: customer_state
+        description: Two-letter Brazilian state code.
+        data_tests:
+          - not_null
+
+  - name: stg_orders
+    description: Cleaned order records with lifecycle timestamps.
+
+    columns:
+      - name: order_id
+        description: Unique order identifier.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: Customer associated with the order.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+
+      - name: order_status
+        description: Current order lifecycle status.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - approved
+                  - canceled
+                  - created
+                  - delivered
+                  - invoiced
+                  - processing
+                  - shipped
+                  - unavailable
+
+  - name: stg_order_items
+    description: Cleaned line-item records containing products, sellers, and prices.
+
+    columns:
+      - name: order_item_key
+        description: Unique identifier created from order_id and order_item_id.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        description: Order containing this item.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+
+
+      - name: order_item_id
+        description: Sequential item number within an order.
+        data_tests:
+          - not_null
+
+      - name: product_id
+        description: Product included in the order.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+
+      - name: seller_id
+        description: Seller responsible for the item.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_sellers')
+                field: seller_id
+
+      - name: price
+        description: Product price excluding freight.
+        data_tests:
+          - not_null
+
+      - name: freight_value
+        description: Freight charge assigned to the item.
+        data_tests:
+          - not_null
+
+  - name: stg_products
+    description: Cleaned product category and physical attribute data.
+
+    columns:
+      - name: product_id
+        description: Unique product identifier.
+        data_tests:
+          - not_null
+          - unique
+
+  - name: stg_sellers
+    description: Cleaned seller account and location records.
+
+    columns:
+      - name: seller_id
+        description: Unique seller identifier.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: seller_state
+        description: Two-letter Brazilian state code.
+        data_tests:
+          - not_null
+
+  - name: stg_order_payments
+    description: Cleaned payment records for each order.
+
+    columns:
+      - name: order_payment_key
+        description: Unique identifier created from order_id and payment sequence.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        description: Order associated with this payment.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+
+      - name: payment_sequential
+        description: Sequence number when an order has multiple payments.
+        data_tests:
+          - not_null
+
+      - name: payment_type
+        description: Method used to make the payment.
+        data_tests:
+          - not_null
+
+      - name: payment_installments
+        description: Number of payment installments.
+        data_tests:
+          - not_null
+
+      - name: payment_value
+        description: Amount recorded for this payment.
+        data_tests:
+          - not_null
+
+  - name: stg_order_reviews
+    description: Cleaned customer ratings, comments, and review timestamps.
+
+    columns:
+      - name: order_review_key
+        description: Unique identifier created from review_id and order_id.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: review_id
+        description: Source review identifier.
+        data_tests:
+          - not_null
+
+      - name: order_id
+        description: Order associated with the review.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+
+      - name: review_score
+        description: Customer rating from one through five.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+
+  - name: stg_product_category_translation
+    description: Cleaned mapping between Portuguese and English product categories.
+
+    columns:
+      - name: product_category_name
+        description: Original Portuguese product category.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: product_category_name_english
+        description: English product category name.
+        data_tests:
+          - not_null
+
+  - name: stg_geolocation
+    description: Cleaned Brazilian ZIP-code coordinate and location records.
+
+    columns:
+      - name: geolocation_zip_code_prefix
+        description: First five digits of the Brazilian ZIP code.
+        data_tests:
+          - not_null
+
+      - name: geolocation_latitude
+        description: Geographic latitude.
+        data_tests:
+          - not_null
+
+      - name: geolocation_longitude
+        description: Geographic longitude.
+        data_tests:
+          - not_null
+
+      - name: geolocation_city
+        description: City associated with the coordinate.
+        data_tests:
+          - not_null
+
+      - name: geolocation_state
+        description: Two-letter Brazilian state code.
+        data_tests:
+          - not_null
+

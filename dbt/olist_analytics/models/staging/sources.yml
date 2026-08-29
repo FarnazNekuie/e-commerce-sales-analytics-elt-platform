@@ -1,0 +1,36 @@
+version: 2
+
+sources:
+  - name: olist_raw
+    description: Raw Olist e-commerce data replicated from PostgreSQL by Fivetran.
+    database: OLIST_RAW
+    schema: OLIST_POSTGRES_OLIST
+
+    tables:
+      - name: customers
+        description: Customer account and location data.
+
+      - name: geolocation
+        description: Brazilian ZIP-code geographic coordinates.
+
+      - name: orders
+        description: Order status and lifecycle timestamps.
+
+      - name: order_items
+        description: Products, sellers, prices, and freight values for each order.
+
+      - name: order_payments
+        description: Payment methods, installments, and payment amounts.
+
+      - name: order_reviews
+        description: Customer review scores and comments.
+
+      - name: products
+        description: Product categories and physical attributes.
+
+      - name: product_category_translation
+        description: Portuguese-to-English product category translations.
+
+      - name: sellers
+        description: Seller account and location data.
+
