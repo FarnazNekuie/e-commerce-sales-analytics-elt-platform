@@ -1,24 +1,50 @@
 name: olist-analytics
 
+x-airflow-common: &airflow-common
+  image: olist-airflow:3.3.1
+  build:
+    context: .
+    dockerfile: airflow/Dockerfile
+  user: "50000:0"
+
+  env_file:
+    - .env.airflow
+    - .env.dbt
+    - .env.fivetran
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db/airflow?sslmode=disable
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: "airflow:admin"
+    AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_PASSWORDS_FILE: "/opt/airflow/config/simple_auth_manager_passwords.json"
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: "http://airflow-api-server:8080/execution/"
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    - ./airflow/plugins:/opt/airflow/plugins
+    - ./dbt/olist_analytics:/opt/airflow/dbt/olist_analytics
+    - ./airflow/config/simple_auth_manager_passwords.json:/opt/airflow/config/simple_auth_manager_passwords.json
+    - ${DBT_PRIVATE_KEY_HOST_PATH}:/keys/dbt_private_key.p8:ro
+  depends_on:
+    airflow-db:
+      condition: service_healthy
+
 services:
   postgres:
     image: postgres:16
     container_name: olist-postgres
     restart: unless-stopped
-
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-
     ports:
       - "${POSTGRES_HOST_PORT}:5432"
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
       - ./data/raw:/data/raw:ro
-
     healthcheck:
       test:
         [
@@ -29,8 +55,88 @@ services:
       timeout: 5s
       retries: 5
 
+  airflow-db:
+    image: postgres:16
+    container_name: olist-airflow-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U airflow -d airflow",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow-init:
+    <<: *airflow-common
+    container_name: olist-airflow-init
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db/airflow?sslmode=disable
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      _AIRFLOW_DB_MIGRATE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+    command: version
+    restart: "no"
+
+  airflow-api-server:
+    <<: *airflow-common
+    container_name: olist-airflow-api-server
+    command: api-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      airflow-db:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: olist-airflow-scheduler
+    command: scheduler
+    restart: unless-stopped
+    depends_on:
+      airflow-db:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-dag-processor:
+    <<: *airflow-common
+    container_name: olist-airflow-dag-processor
+    command: dag-processor
+    restart: unless-stopped
+    depends_on:
+      airflow-db:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-triggerer:
+    <<: *airflow-common
+    container_name: olist-airflow-triggerer
+    command: triggerer
+    restart: unless-stopped
+    depends_on:
+      airflow-db:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
 volumes:
   postgres_data:
     name: olist-postgres-data
 
+  airflow_db_data:
+    name: olist-airflow-metadata
 
