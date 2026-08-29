@@ -14,6 +14,7 @@ olist_dbt_transformations = DbtDag(
     schedule=None,
     start_date=datetime(2026, 1, 1, tzinfo=timezone.utc),
     catchup=False,
+    max_active_tasks=4,
     default_args={
         "owner": "data-engineering",
         "retries": 2,

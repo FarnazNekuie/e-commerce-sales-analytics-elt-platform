@@ -230,11 +230,12 @@ profiles.yml
 data/raw/*
 !data/raw/.gitkeep
 
-# Airflow-generated files
+# Airflow-generated and private files
 airflow/logs/
 airflow/airflow.db
 airflow/airflow.cfg
 airflow/webserver_config.py
+airflow/config/simple_auth_manager_passwords.json
 
 # dbt-generated files
 dbt/**/target/
@@ -245,5 +246,4 @@ dbt/**/dbt_packages/
 .DS_Store
 
 .user.yml
-
 

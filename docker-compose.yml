@@ -15,11 +15,15 @@ x-airflow-common: &airflow-common
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db/airflow
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: "airflow:admin"
+    AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_PASSWORDS_FILE: "/opt/airflow/config/simple_auth_manager_passwords.json"
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: "http://airflow-api-server:8080/execution/"
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/logs:/opt/airflow/logs
     - ./airflow/plugins:/opt/airflow/plugins
-    - ./dbt/olist_analytics:/opt/airflow/dbt/olist_analytics:ro
+    - ./dbt/olist_analytics:/opt/airflow/dbt/olist_analytics
+    - ./airflow/config/simple_auth_manager_passwords.json:/opt/airflow/config/simple_auth_manager_passwords.json
     - ${DBT_PRIVATE_KEY_HOST_PATH}:/keys/dbt_private_key.p8:ro
   depends_on:
     airflow-db:
@@ -134,5 +138,4 @@ volumes:
 
   airflow_db_data:
     name: olist-airflow-metadata
-
 
