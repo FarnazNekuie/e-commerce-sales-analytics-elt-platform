@@ -1,0 +1,156 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: Customer dimension used for location and repeat-customer analysis.
+
+    columns:
+      - name: customer_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_unique_id
+        data_tests:
+          - not_null
+
+      - name: customer_state
+        data_tests:
+          - not_null
+
+  - name: dim_products
+    description: Product dimension with English category names and physical attributes.
+
+    columns:
+      - name: product_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: product_category_name_english
+        data_tests:
+          - not_null
+
+  - name: dim_sellers
+    description: Seller dimension used for seller and geographic analysis.
+
+    columns:
+      - name: seller_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: seller_state
+        data_tests:
+          - not_null
+
+  - name: fct_orders
+    description: One row per order with sales, payment, delivery, and review measures.
+
+    columns:
+      - name: order_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_id
+
+      - name: order_status
+        data_tests:
+          - not_null
+
+      - name: total_order_item_value
+        data_tests:
+          - not_null
+
+      - name: total_payment_value
+        data_tests:
+          - not_null
+
+  - name: fct_order_items
+    description: One row per item within an order for product and seller analysis.
+
+    columns:
+      - name: order_item_key
+        data_tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_orders')
+                field: order_id
+
+      - name: customer_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_id
+
+      - name: product_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_id
+
+      - name: seller_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_sellers')
+                field: seller_id
+
+      - name: total_item_value
+        data_tests:
+          - not_null
+
+  - name: mart_daily_sales
+    description: Daily delivered-order revenue, customer, delivery, and review metrics.
+
+    columns:
+      - name: order_purchase_date
+        data_tests:
+          - not_null
+          - unique
+
+      - name: total_revenue
+        data_tests:
+          - not_null
+
+  - name: mart_product_category_performance
+    description: Delivered-item performance summarized by English product category.
+
+    columns:
+      - name: product_category_name_english
+        data_tests:
+          - not_null
+          - unique
+
+      - name: total_product_revenue
+        data_tests:
+          - not_null
+
+  - name: mart_customer_summary
+    description: Order history and lifetime revenue summarized by real customer.
+
+    columns:
+      - name: customer_unique_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: lifetime_revenue
+        data_tests:
+          - not_null
+

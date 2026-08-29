@@ -1,0 +1,138 @@
+version: 2
+
+models:
+  - name: int_products_enriched
+    description: Products enriched with standardized English category names.
+
+    columns:
+      - name: product_id
+        description: Unique product identifier.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: product_category_name_english
+        description: English category name or unknown when unavailable.
+        data_tests:
+          - not_null
+
+  - name: int_order_items_enriched
+    description: Order items enriched with order, customer, product, and seller details.
+
+    columns:
+      - name: order_item_key
+        description: Unique identifier for an item within an order.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        description: Order containing this item.
+        data_tests:
+          - not_null
+
+      - name: customer_id
+        description: Customer record associated with the order.
+        data_tests:
+          - not_null
+
+      - name: product_id
+        description: Product included in the order item.
+        data_tests:
+          - not_null
+
+      - name: seller_id
+        description: Seller responsible for the order item.
+        data_tests:
+          - not_null
+
+      - name: total_item_value
+        description: Product price plus freight value.
+        data_tests:
+          - not_null
+
+  - name: int_order_payments_aggregated
+    description: Payment records aggregated to one row per order.
+
+    columns:
+      - name: order_id
+        description: Unique order identifier.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: total_payment_value
+        description: Total amount paid across all payment records for the order.
+        data_tests:
+          - not_null
+
+  - name: int_order_items_aggregated
+    description: Order-item measures aggregated to one row per order.
+
+    columns:
+      - name: order_id
+        description: Unique order identifier.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: total_order_item_value
+        description: Total product and freight value for the order.
+        data_tests:
+          - not_null
+
+  - name: int_order_items_aggregated
+    description: Order-item measures aggregated to one row per order.
+
+    columns:
+      - name: order_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: total_order_item_value
+        data_tests:
+          - not_null
+
+  - name: int_order_reviews_aggregated
+    description: Customer reviews aggregated to one row per order.
+
+    columns:
+      - name: order_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: average_review_score
+        data_tests:
+          - not_null
+
+  - name: int_orders_enriched
+    description: One row per order with customer, item, payment, delivery, and review measures.
+
+    columns:
+      - name: order_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        data_tests:
+          - not_null
+
+      - name: order_status
+        data_tests:
+          - not_null
+
+      - name: item_count
+        data_tests:
+          - not_null
+
+      - name: total_order_item_value
+        data_tests:
+          - not_null
+
+      - name: total_payment_value
+        data_tests:
+          - not_null
+
