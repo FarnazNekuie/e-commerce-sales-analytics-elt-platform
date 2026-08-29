@@ -244,6 +244,7 @@ dbt/**/dbt_packages/
 # macOS
 .DS_Store
 
+.user.yml
 
 
 

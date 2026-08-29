@@ -1,0 +1,25 @@
+with source as (
+
+    select *
+    from {{ source('olist_raw', 'order_items') }}
+
+),
+
+renamed as (
+
+    select
+        order_id || '-' || order_item_id::varchar as order_item_key,
+        order_id,
+        order_item_id,
+        product_id,
+        seller_id,
+        shipping_limit_date,
+        price,
+        freight_value
+    from source
+
+)
+
+select *
+from renamed
+
