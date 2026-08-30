@@ -3,11 +3,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
-from requests.auth import HTTPBasicAuth
-
 from airflow.exceptions import AirflowException
 from airflow.sdk import PokeReturnValue, dag, task
 from cosmos import DbtTaskGroup, ExecutionConfig, ProfileConfig, ProjectConfig
+from requests.auth import HTTPBasicAuth
+
 
 
 DBT_PROJECT_PATH = Path("/opt/airflow/dbt/olist_analytics")
