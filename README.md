@@ -158,10 +158,15 @@ cp .env.dbt.example .env.dbt
 cp .env.fivetran.example .env.fivetran
 cp dbt/olist_analytics/profiles.yml.example \
   dbt/olist_analytics/profiles.yml
+cp airflow/config/simple_auth_manager_passwords.json.example \
+  airflow/config/simple_auth_manager_passwords.json
 ```
 
-Replace every placeholder with your own configuration. Keep the resulting
-`.env*` files and `profiles.yml` uncommitted.
+Replace every placeholder with your own configuration. Also replace the
+placeholder password in
+`airflow/config/simple_auth_manager_passwords.json`. Keep the resulting
+`.env*`, `profiles.yml`, and Simple Auth Manager password file uncommitted.
+
 
 Set `DBT_PRIVATE_KEY_HOST_PATH` in the root `.env` file to the absolute host
 path of the dbt user's private key. Docker Compose mounts it read-only at
