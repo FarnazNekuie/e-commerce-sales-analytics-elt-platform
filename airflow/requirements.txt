@@ -1,2 +1,3 @@
 astronomer-cosmos==1.15.1
+requests==2.34.2astronomer-cosmos==1.15.1
 

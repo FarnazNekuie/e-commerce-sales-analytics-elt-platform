@@ -28,6 +28,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install PyYAML==6.0.3
+          python -m pip install -r requirements-dev.txt
 
       - name: Validate Python syntax
         run: python -m compileall -q airflow/dags
@@ -36,7 +37,14 @@ jobs:
         uses: astral-sh/ruff-action@v3.3.1
         with:
           version: "0.16.5"
-          args: "check airflow"
+          args: "check airflow tests"
+      - name: Check Python formatting
+        run: ruff format --check airflow tests
+
+      - name: Run Fivetran unit tests
+        env:
+          PYTHONPATH: airflow/dags
+        run: python -m pytest tests -v
 
       - name: Validate YAML files
         run: |
