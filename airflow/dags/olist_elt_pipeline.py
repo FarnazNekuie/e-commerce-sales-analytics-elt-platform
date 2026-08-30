@@ -8,8 +8,6 @@ from airflow.sdk import PokeReturnValue, dag, task
 from cosmos import DbtTaskGroup, ExecutionConfig, ProfileConfig, ProjectConfig
 from requests.auth import HTTPBasicAuth
 
-
-
 DBT_PROJECT_PATH = Path("/opt/airflow/dbt/olist_analytics")
 DBT_EXECUTABLE_PATH = Path("/opt/airflow/dbt_venv/bin/dbt")
 DBT_PROFILES_PATH = DBT_PROJECT_PATH / "profiles.yml"
