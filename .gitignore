@@ -150,7 +150,13 @@ activemq-data/
 # Environments
 .env
 .env.*
+
+# Keep safe environment templates in version control.
 !.env.example
+!.env.airflow.example
+!.env.dbt.example
+!.env.fivetran.example
+
 .envrc
 .venv
 env/
@@ -158,7 +164,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
 
 # Spyder project settings
 .spyderproject
