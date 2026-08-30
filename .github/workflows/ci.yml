@@ -82,4 +82,3 @@ jobs:
 
       - name: Validate Docker Compose configuration
         run: docker compose config --quiet
-
