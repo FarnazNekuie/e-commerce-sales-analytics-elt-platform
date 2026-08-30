@@ -49,6 +49,9 @@ flowchart TD
 See [docs/architecture.md](docs/architecture.md) for implementation details,
 failure handling, and the local-versus-managed-service topology.
 
+For startup, validation, monitoring, and troubleshooting procedures, see the
+[operations runbook](docs/operations-runbook.md).
+
 ## Data model
 
 The dbt project contains 23 models:
@@ -223,7 +226,7 @@ docker compose exec airflow-scheduler \
 ├── airflow/                  # Airflow image, DAG, configuration, and plugins
 ├── data/raw/                 # Local source CSVs; contents ignored by Git
 ├── dbt/olist_analytics/      # dbt models, tests, profile example, and metadata
-├── docs/                     # Architecture documentation
+├── docs/                  # Architecture notes and operations runbook
 ├── postgres/
 │   ├── init/                 # Local PostgreSQL schema and data loading
 │   ├── neon/                 # Read-only Fivetran user configuration
