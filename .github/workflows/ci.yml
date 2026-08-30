@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-validation:
+    name: Static validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install validation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install PyYAML==6.0.3
+
+      - name: Validate Python syntax
+        run: python -m compileall -q airflow/dags
+
+      - name: Lint Python with Ruff
+        uses: astral-sh/ruff-action@v3.3.1
+        with:
+          version: "0.16.5"
+          args: "check airflow"
+
+      - name: Validate YAML files
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          import yaml
+
+          paths = sorted(
+              list(Path(".").rglob("*.yml"))
+              + list(Path(".").rglob("*.yaml"))
+          )
+
+          for path in paths:
+              with path.open(encoding="utf-8") as stream:
+                  yaml.safe_load(stream)
+              print(f"Validated {path}")
+          PY
+
+      - name: Validate JSON examples
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          paths = sorted(Path(".").rglob("*.json.example"))
+
+          for path in paths:
+              json.loads(path.read_text(encoding="utf-8"))
+              print(f"Validated {path}")
+          PY
+
+      - name: Prepare safe configuration
+        run: |
+          cp .env.example .env
+          cp .env.airflow.example .env.airflow
+          cp .env.dbt.example .env.dbt
+          cp .env.fivetran.example .env.fivetran
+          cp dbt/olist_analytics/profiles.yml.example \
+            dbt/olist_analytics/profiles.yml
+          cp airflow/config/simple_auth_manager_passwords.json.example \
+            airflow/config/simple_auth_manager_passwords.json
+
+      - name: Validate Docker Compose configuration
+        run: docker compose config --quiet
+
