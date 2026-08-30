@@ -1,5 +1,7 @@
 # Olist E-Commerce Sales Analytics Platform
 
+[![CI](https://github.com/FarnazNekuie/e-commerce-sales-analytics-elt-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/FarnazNekuie/e-commerce-sales-analytics-elt-platform/actions/workflows/ci.yml)
+
 An end-to-end ELT platform that transforms the Olist Brazilian e-commerce
 dataset into tested Snowflake analytics marts and an interactive Looker Studio
 dashboard.
@@ -100,6 +102,19 @@ Quality controls are applied at both the source and warehouse layers:
 
 The dbt project contains 110 tests after adding the payment reconciliation
 check.
+
+## Automated validation
+
+GitHub Actions validates every pull request and change to `main` by:
+
+- compiling the Airflow Python code;
+- enforcing Ruff linting and formatting;
+- running seven mocked unit tests for Fivetran API and sync-state behavior;
+- validating YAML and JSON configuration files; and
+- validating the rendered Docker Compose configuration.
+
+The unit tests cover successful, active, unchanged, paused, and failed sync
+states, along with expected and unexpected HTTP `409` responses.
 
 ## Analytics dashboard
 
@@ -223,16 +238,19 @@ docker compose exec airflow-scheduler \
 ## Repository structure
 
 ```text
+├── .github/workflows/        # GitHub Actions CI workflow
 ├── airflow/                  # Airflow image, DAG, configuration, and plugins
 ├── data/raw/                 # Local source CSVs; contents ignored by Git
 ├── dbt/olist_analytics/      # dbt models, tests, profile example, and metadata
-├── docs/                  # Architecture notes and operations runbook
+├── docs/                     # Architecture notes and operations runbook
 ├── postgres/
 │   ├── init/                 # Local PostgreSQL schema and data loading
 │   ├── neon/                 # Read-only Fivetran user configuration
 │   └── validation/           # Source data-quality checks
-├── screenshots/dashboard/   # Looker Studio dashboard screenshots
+├── screenshots/dashboard/    # Looker Studio dashboard screenshots
+├── tests/                    # Mocked Fivetran orchestration unit tests
 ├── docker-compose.yml
+├── requirements-dev.txt      # Local and CI testing dependencies
 └── README.md
 ```
 
@@ -241,6 +259,8 @@ docker compose exec airflow-scheduler \
 - 1,550,922 records loaded across nine PostgreSQL source tables
 - 23 dbt models across staging, intermediate, and marts layers
 - 110 automated dbt tests
+- 7 mocked Python unit tests covering Fivetran API and sync-state behavior
+- GitHub Actions validation for Python, YAML, JSON, tests, and Docker Compose
 - 48 Airflow tasks generated without DAG import errors
 - Successful Fivetran-to-dbt end-to-end execution in approximately 1 minute
   38 seconds during project validation
